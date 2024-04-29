@@ -40,7 +40,6 @@ class TaskRunnerConfigurerBuilder {
     var eurekaClient: EurekaClient? = null
     var taskClient: TaskClient? = null
     var taskToDomain: Map<String, String> = mapOf()
-    var taskThreadCount: MutableMap<String, Int> = HashMap()
 
     fun addWorker(worker: Worker) {
         workers += worker
@@ -58,7 +57,6 @@ class TaskRunnerConfigurerBuilder {
      * this constructor for the polling to start.
      */
     internal fun build(): TaskRunnerConfigurer {
-        require(taskThreadCount.isNotEmpty()) { "Task thread map should not be empty" }
         require(workers.isNotEmpty()) { "Workers cannot be empty" }
         requireNotNull(taskClient) { "task client should not be null" }
         return TaskRunnerConfigurer(this)

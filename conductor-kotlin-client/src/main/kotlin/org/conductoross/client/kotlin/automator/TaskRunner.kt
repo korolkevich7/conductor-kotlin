@@ -31,11 +31,9 @@ import org.conductoross.client.kotlin.worker.Worker
 private val logger = KotlinLogging.logger {}
 
 internal fun startWorkerWithChannel(worker: Worker, workersDispatcher: CoroutineDispatcher, taskPollExecutor: TaskPollExecutor) {
-    val taskDispatcher = worker.dispatcher(workersDispatcher)
-    val workerScope = CoroutineScope(taskDispatcher + SupervisorJob() + CoroutineName("Task ${worker.taskDefName} context"))
+    val workerScope = CoroutineScope(workersDispatcher + SupervisorJob() + CoroutineName("Task ${worker.taskDefName} context"))
 
     val taskChannel: ReceiveChannel<Task> = workerScope.receiveChannel(worker, taskPollExecutor)
-
     workerScope.launch {
         for (task in taskChannel) {
             runCatching { taskPollExecutor.processTask(worker, task) }
@@ -46,7 +44,7 @@ internal fun startWorkerWithChannel(worker: Worker, workersDispatcher: Coroutine
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
-private fun CoroutineScope.receiveChannel(worker: Worker, taskPollExecutor: TaskPollExecutor) = produce(capacity = worker.batchPollCount) {
+private fun CoroutineScope.receiveChannel(worker: Worker, taskPollExecutor: TaskPollExecutor) = produce(capacity = worker.bufferTaskSize) {
     while (this.isClosedForSend.not()) {
         val pollingResult = runCatching { taskPollExecutor.poll(worker) }
         pollingResult
@@ -61,9 +59,8 @@ private fun CoroutineScope.receiveChannel(worker: Worker, taskPollExecutor: Task
 
 
 internal fun startWorkerWithFlow(worker: Worker, workersDispatcher: CoroutineDispatcher, taskPollExecutor: TaskPollExecutor) {
-    val taskDispatcher = worker.dispatcher(workersDispatcher)
     val workerScope = CoroutineScope(
-        taskDispatcher +
+        workersDispatcher +
                 SupervisorJob() +
                 CoroutineName("Task ${worker.taskDefName} context")
     )
@@ -73,7 +70,7 @@ internal fun startWorkerWithFlow(worker: Worker, workersDispatcher: CoroutineDis
         }
         .catch { handleProcessException(it) }
         .onEach { taskPollExecutor.updateTaskResult(it.first, it.second, worker) }
-        .flowOn(taskDispatcher)
+        .flowOn(workersDispatcher)//todo: remove?
 
     CoroutineScope(SupervisorJob()).launch(workersDispatcher) {
         flow.collect()
@@ -91,11 +88,7 @@ internal fun CoroutineScope.taskFlow(executor: TaskPollExecutor, worker: Worker)
                 emitAll(tasks.asFlow())
             }
     }
-}.buffer(worker.batchPollCount, onBufferOverflow = BufferOverflow.SUSPEND)
-
-@OptIn(ExperimentalCoroutinesApi::class)
-internal fun Worker.dispatcher(coroutineDispatcher: CoroutineDispatcher): CoroutineDispatcher =
-    this.limitedParallelism?.let { coroutineDispatcher.limitedParallelism(it) } ?: coroutineDispatcher
+}.buffer(worker.bufferTaskSize, onBufferOverflow = BufferOverflow.SUSPEND)
 
 internal fun handleProcessException(t: Throwable) {
     when (t) {

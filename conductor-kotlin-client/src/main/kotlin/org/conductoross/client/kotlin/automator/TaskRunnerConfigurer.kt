@@ -4,18 +4,19 @@ import org.conductoross.client.kotlin.http.TaskClient
 import org.conductoross.client.kotlin.worker.Worker
 import com.netflix.discovery.EurekaClient
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlin.math.min
 import kotlin.time.Duration
 import kotlinx.coroutines.*
 
-
+const val MIN_WORKERS_PARALLELISM = 8
 private val logger = KotlinLogging.logger {}
 
 /** Configures automated polling of tasks and execution via the registered [Worker]s.  */
-@OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class TaskRunnerConfigurer internal constructor(builder: TaskRunnerConfigurerBuilder) {
     private val eurekaClient: EurekaClient?
     private val taskClient: TaskClient
-    private val workers: MutableList<Worker> = mutableListOf()
+    private val workers: Collection<Worker>
 
     /**
      * @return sleep time in millisecond before task update retry is done when receiving error from
@@ -38,11 +39,6 @@ class TaskRunnerConfigurer internal constructor(builder: TaskRunnerConfigurerBui
     private val taskPollExecutor: TaskPollExecutor
 
     /**
-     * @return Thread Count for individual task type
-     */
-    val taskThreadCount: MutableMap<String, Int>
-
-    /**
      * @return Thread count for leasing tasks
      */
     private val leaseLimitedParallelism: Int
@@ -50,23 +46,7 @@ class TaskRunnerConfigurer internal constructor(builder: TaskRunnerConfigurerBui
     val workersDispatcher: CoroutineDispatcher
 
     init {
-        for (worker in builder.workers) {
-            if (!builder.taskThreadCount.containsKey(worker.taskDefName)) {
-                logger.warn {
-                    "No thread count specified for task type ${worker.taskDefName}, default to 1 thread"
-                }
-                builder.taskThreadCount[worker.taskDefName] = 1
-            }
-            workers.add(worker)
-        }
-
-        if (builder.taskThreadCount.isNotEmpty()) {
-            val defaultThreadsMap =
-                workers.map { it.taskDefName }.subtract(builder.taskThreadCount.keys).associateWith { 1 }
-            taskThreadCount = (builder.taskThreadCount + defaultThreadsMap).toMutableMap()
-        } else {
-            taskThreadCount = mutableMapOf()
-        }
+        workers = builder.workers
 
         eurekaClient = builder.eurekaClient
         taskClient = builder.taskClient!!
@@ -76,7 +56,7 @@ class TaskRunnerConfigurer internal constructor(builder: TaskRunnerConfigurerBui
         taskToDomain = builder.taskToDomain
         leaseLimitedParallelism = builder.leaseLimitedParallelism
 
-        workersDispatcher = Dispatchers.Default.limitedParallelism(workers.size)
+        workersDispatcher = Dispatchers.Default.limitedParallelism(min(MIN_WORKERS_PARALLELISM, workers.size))
         val leasingDispatcher = Dispatchers.Default.limitedParallelism(leaseLimitedParallelism)
 
         taskPollExecutor = TaskPollExecutor(

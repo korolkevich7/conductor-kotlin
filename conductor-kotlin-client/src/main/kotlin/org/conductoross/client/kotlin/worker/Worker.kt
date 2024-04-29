@@ -91,8 +91,8 @@ interface Worker {
     val batchPollCount: Int
         get() = PropertyFactory.getInteger(taskDefName, "batchPollCount", 10)
 
-    val limitedParallelism: Int?
-        get() = PropertyFactory.getInteger(taskDefName, "limitedParallelism")
+    val bufferTaskSize: Int
+        get() = PropertyFactory.getInteger(taskDefName, "bufferTaskSize", batchPollCount)
 
     companion object {
 
