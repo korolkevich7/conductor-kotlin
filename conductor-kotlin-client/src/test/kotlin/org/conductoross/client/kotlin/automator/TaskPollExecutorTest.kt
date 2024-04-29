@@ -30,6 +30,7 @@ class TaskPollExecutorTest: KtorClientTest() {
         taskPoolExecutor = TaskPollExecutor(eurekaClient,
             taskClient,
             updateRetryCount = 2,
+            500.milliseconds,
             taskToDomain = emptyMap(),
             leaseExtendDispatcher = Dispatchers.IO.limitedParallelism(2))
     }

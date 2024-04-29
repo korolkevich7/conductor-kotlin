@@ -11,8 +11,6 @@ import com.netflix.conductor.common.metadata.tasks.responseTimeoutFromNow
 import com.netflix.discovery.EurekaClient
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
-import java.io.PrintWriter
-import java.io.StringWriter
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
@@ -27,7 +25,6 @@ import org.conductoross.client.kotlin.telemetry.incrementTaskUpdateErrorCount
 import org.conductoross.client.kotlin.telemetry.recordExecutionTimer
 import org.conductoross.client.kotlin.telemetry.recordPollTimer
 
-typealias TaskWithResult = Pair<Task, TaskResult>
 private val logger = KotlinLogging.logger {}
 
 /**
@@ -38,6 +35,7 @@ class TaskPollExecutor(
     private val eurekaClient: EurekaClient?,
     private val taskClient: TaskClient,
     private val updateRetryCount: Int,
+    private val sleepRetryInterval: Duration,
     private val taskToDomain: Map<String, String>,
     private val leaseExtendDispatcher: CoroutineDispatcher
 ) {
@@ -79,10 +77,6 @@ class TaskPollExecutor(
         MetricsContainer.recordPollTimer(taskType, duration)
         return tasks
     }
-
-//    fun shutdown(timeout: Int) {
-//        TODO("cancel leaseScope instead")
-//    }
 
 ////todo coroutine uncaughtExceptionHandler
 //@OptIn(DelicateCoroutinesApi::class)
@@ -156,13 +150,14 @@ class TaskPollExecutor(
 
     private suspend fun updateTaskResult(
             count: Int,
+            delay: Duration,
             task: Task,
             result: TaskResult,
             worker: Worker
     ) {
         try {
             // upload if necessary
-            val externalStorageLocation = retryIO(times = count) {
+            val externalStorageLocation = retryIO(times = count, initialDelay = delay.inWholeMilliseconds) {
                 upload(result, task.taskType)
             }
             externalStorageLocation?.let {
@@ -227,12 +222,12 @@ class TaskPollExecutor(
         task.status = Task.Status.FAILED
         result.status = TaskResult.Status.FAILED
         result.reasonForIncompletion = "Error while executing the task: $t"
-        result.log(t)
+        result.logStackTrace(t)
         return result
     }
 
     internal suspend fun updateTaskResult(task: Task, result: TaskResult, worker: Worker) {
-        updateTaskResult(updateRetryCount, task, result, worker)
+        updateTaskResult(updateRetryCount, sleepRetryInterval, task, result, worker)
     }
 
     @OptIn(ExperimentalTime::class)
@@ -253,7 +248,7 @@ class TaskPollExecutor(
         try {
             val result = TaskResult(task)
             result.isExtendLease = true
-            retryIO(times = LEASE_EXTEND_RETRY_COUNT) {
+            retryIO(times = LEASE_EXTEND_RETRY_COUNT, sleepRetryInterval.inWholeMilliseconds) {
                 taskClient.updateTask(result)
             }
             MetricsContainer.incrementTaskLeaseExtendCount(
@@ -289,8 +284,10 @@ class TaskPollExecutor(
     }
 }
 
-fun TaskResult.log(t: Throwable) {
-    val stringWriter = StringWriter()
-    t.printStackTrace(PrintWriter(stringWriter))
-    this.log(stringWriter.toString())
+suspend fun TaskResult.logStackTrace(t: Throwable) {
+    withContext(Dispatchers.IO) {
+        log(t.stackTraceToString())
+    }
 }
+
+typealias TaskWithResult = Pair<Task, TaskResult>
