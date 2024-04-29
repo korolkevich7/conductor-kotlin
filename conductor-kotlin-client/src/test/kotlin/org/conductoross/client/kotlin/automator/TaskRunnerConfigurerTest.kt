@@ -36,7 +36,7 @@ class TaskRunnerConfigurerTest {
         val taskThreadCount = mutableMapOf(worker1.taskDefName to 2, worker2.taskDefName to 3)
         TaskRunnerConfigurer {
             taskClient = client
-            workers = listOf(worker1, worker2)
+            addWorkers(listOf(worker1, worker2))
             this.taskThreadCount = taskThreadCount
         }
     }
@@ -48,7 +48,7 @@ class TaskRunnerConfigurerTest {
         val taskThreadCount = mutableMapOf(worker1.taskDefName to 2)
         val configurer = TaskRunnerConfigurer {
             taskClient = client
-            workers = listOf(worker1, worker2)
+            addWorkers(listOf(worker1, worker2))
             this.taskThreadCount = taskThreadCount
         }
         assertFalse(configurer.taskThreadCount.isEmpty())
@@ -65,9 +65,9 @@ class TaskRunnerConfigurerTest {
         val configurer = TaskRunnerConfigurer {
             taskClient = client
             this.taskThreadCount = taskThreadCount
-            workers = listOf(worker1, worker2)
+            addWorkers(listOf(worker1, worker2))
         }
-        configurer.init()
+        configurer.start()
         assertEquals(2, configurer.taskThreadCount["task1"]?.toLong())
         assertEquals(3, configurer.taskThreadCount["task2"]?.toLong())
     }
