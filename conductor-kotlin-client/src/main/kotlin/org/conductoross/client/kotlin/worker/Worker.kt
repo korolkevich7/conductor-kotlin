@@ -71,7 +71,7 @@ interface Worker {
                 serverId =
                     if (EC2MetadataUtils.getInstanceId() == null) System.getProperty("user.name") else EC2MetadataUtils.getInstanceId()
             }
-            LOGGER.debug{ "Setting worker id to ${serverId}" }
+            LOGGER.debug{ "Setting worker id to $serverId" }
             return serverId
         }
     val pollingInterval: Int

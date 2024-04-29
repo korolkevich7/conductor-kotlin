@@ -18,7 +18,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 
 fun main() {
-    val taskClient: TaskClient = KtorTaskClient("http://localhost:8080/api/", HttpClient(CIO))
+    val ktorTaskClient: TaskClient = KtorTaskClient("http://localhost:8080/api/", HttpClient(CIO))
     val threadCount = 2 // number of threads used to execute workers.  To avoid starvation, should be
     // same or more than number of workers
     val worker1 = SampleWorker("task_1")
@@ -26,10 +26,10 @@ fun main() {
 
     // Create TaskRunnerConfigurer
     val configurer = TaskRunnerConfigurer {
-        this.taskClient = taskClient
+        taskClient = ktorTaskClient
         workers = listOf(worker1, worker2)
     }
 
     // Start the polling and execution of tasks
-    configurer.init()
+    configurer.start()
 }

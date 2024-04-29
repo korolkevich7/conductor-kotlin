@@ -18,7 +18,6 @@ import kotlinx.coroutines.channels.Channel
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.time.Duration
-import com.netflix.spectator.api.record
 
 internal sealed interface MetricOperation {
     val name: String
