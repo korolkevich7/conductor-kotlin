@@ -16,7 +16,7 @@ import com.netflix.config.DynamicProperty
 import java.util.concurrent.ConcurrentHashMap
 
 /** Used to configure the Conductor workers using properties.  */
-class PropertyFactory private constructor(prefix: String, propName: String, workerName: String) {
+class PropertyFactory private constructor(prefix: String, workerName: String, propName: String) {
     private val global: DynamicProperty
     private val local: DynamicProperty
 
@@ -52,38 +52,24 @@ class PropertyFactory private constructor(prefix: String, propName: String, work
     companion object {
         private const val PROPERTY_PREFIX = "conductor.worker"
         private val PROPERTY_FACTORY_MAP = ConcurrentHashMap<String, PropertyFactory>()
-        @JvmStatic
-        fun getInteger(workerName: String, property: String, defaultValue: Int? = null): Int? {
-            return getPropertyFactory(workerName, property).getInteger() ?: defaultValue
+
+        fun getInteger(workerName: String, property: String): Int? {
+            return getPropertyFactory(workerName, property).getInteger()
         }
 
-        fun getInteger(workerName: String, property: String, defaultValue: Int): Int {
-            return getPropertyFactory(workerName, property).getInteger() ?: defaultValue
+        fun getBoolean(workerName: String, property: String): Boolean? {
+            return getPropertyFactory(workerName, property).getBoolean()
         }
 
-        @JvmStatic
-        fun getBoolean(workerName: String, property: String, defaultValue: Boolean? = null): Boolean? {
-            return getPropertyFactory(workerName, property).getBoolean() ?: defaultValue
+        fun getString(workerName: String, property: String): String? {
+            return getPropertyFactory(workerName, property).getString()
         }
-
-        fun getBoolean(workerName: String, property: String, defaultValue: Boolean): Boolean {
-            return getPropertyFactory(workerName, property).getBoolean() ?: defaultValue
-        }
-
-//        @JvmStatic
-        fun getString(workerName: String, property: String, defaultValue: String? = null): String? {
-            return getPropertyFactory(workerName, property).getString() ?: defaultValue
-        }
-
-//        fun getString(workerName: String, property: String, defaultValue: String): String {
-//            return getPropertyFactory(workerName, property).getString() ?: defaultValue
-//        }
 
         private fun getPropertyFactory(workerName: String, property: String): PropertyFactory {
-            val key = "$property.$workerName"
+            val key = "$workerName.$property"
             return PROPERTY_FACTORY_MAP.computeIfAbsent(
                 key
-            ) { PropertyFactory(PROPERTY_PREFIX, property, workerName) }
+            ) { PropertyFactory(PROPERTY_PREFIX, workerName, property) }
         }
     }
 }

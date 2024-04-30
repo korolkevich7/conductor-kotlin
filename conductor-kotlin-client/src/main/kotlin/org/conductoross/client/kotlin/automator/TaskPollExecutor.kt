@@ -266,7 +266,7 @@ class TaskPollExecutor(
 
     private fun isDiscoveryOverride(taskDefName: String): Boolean {
         return PropertyFactory.getBoolean(taskDefName, OVERRIDE_DISCOVERY)
-            ?: PropertyFactory.getBoolean(ALL_WORKERS, OVERRIDE_DISCOVERY, false)
+            ?: PropertyFactory.getBoolean(ALL_WORKERS, OVERRIDE_DISCOVERY) ?: false
     }
 
     private fun taskDomain(taskType: String): String? {

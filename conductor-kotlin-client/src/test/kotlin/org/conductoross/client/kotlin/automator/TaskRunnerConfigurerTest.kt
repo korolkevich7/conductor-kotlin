@@ -11,16 +11,14 @@
  */
 package org.conductoross.client.kotlin.automator
 
-import org.conductoross.client.kotlin.http.TaskClient
-import org.conductoross.client.kotlin.worker.Worker.Companion.create
 import com.netflix.conductor.common.metadata.tasks.Task
 import com.netflix.conductor.common.metadata.tasks.TaskResult
-import org.mockito.Mockito
-import java.util.UUID
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import org.conductoross.client.kotlin.http.TaskClient
+import org.conductoross.client.kotlin.worker.Worker.Companion.create
+import org.mockito.Mockito
+import java.util.*
 
 class TaskRunnerConfigurerTest {
     private lateinit var client: TaskClient
@@ -33,7 +31,6 @@ class TaskRunnerConfigurerTest {
     fun testInvalidThreadConfig() {
         val worker1 = create("task1") { task: Task? -> TaskResult(task) }
         val worker2 = create("task2") { task: Task? -> TaskResult(task) }
-        val taskThreadCount = mutableMapOf(worker1.taskDefName to 2, worker2.taskDefName to 3)
         TaskRunnerConfigurer {
             taskClient = client
             addWorkers(listOf(worker1, worker2))

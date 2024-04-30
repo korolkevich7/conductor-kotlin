@@ -23,29 +23,21 @@ class TestPropertyFactory {
 
     @Test
     fun test() {
-        val property = getInteger("workerB", "pollingInterval", 100)
-        assertEquals( 2, property.toLong(), "got: $property",)
+        val property = getInteger("workerB", "pollingInterval") ?: 100
+        assertEquals( 2, property.toLong(), "got: $property")
         assertEquals(
-            100, getInteger("workerB", "propWithoutValue", 100).toLong()
+            100, getInteger("workerB", "propWithoutValue") ?: 100
         )
-        assertFalse(
-            getBoolean(
-                "workerB", "paused", true
-            )
-        ) // Global value set to 'false'
-        assertTrue(
-            getBoolean(
-                "workerA", "paused", false
-            )
-        ) // WorkerA value set to 'true'
+        assertFalse(getBoolean("workerB", "paused") ?: true) // Global value set to 'false'
+        assertTrue(getBoolean("workerA", "paused") ?: false) // WorkerA value set to 'true'
         assertEquals(
             42,
-            getInteger("workerA", "batchSize", 42).toLong()
+            getInteger("workerA", "batchSize") ?: 42
         ) // No global value set, so will return the default value
         // supplied
         assertEquals(
             84,
-            getInteger("workerB", "batchSize", 42).toLong()
+            getInteger("workerB", "batchSize") ?: 42
         ) // WorkerB's value set to 84
         assertEquals("domainA", getString("workerA", "domain"))
         assertEquals("domainB", getString("workerB", "domain"))

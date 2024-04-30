@@ -51,7 +51,7 @@ interface Worker {
      * @return true if the worker is paused and no more tasks should be polled from server.
      */
     fun paused(): Boolean {
-        return PropertyFactory.getBoolean(taskDefName, "paused", false)
+        return PropertyFactory.getBoolean(taskDefName, "paused") ?: false
     }
 
     val identity: String?
@@ -80,19 +80,19 @@ interface Worker {
          *
          * @return interval in millisecond at which the server should be polled for worker tasks.
          */
-        get() = PropertyFactory.getInteger(taskDefName, "pollInterval", 1000)
+        get() = PropertyFactory.getInteger(taskDefName, "pollInterval") ?: 1000
 
     val leaseExtendEnabled: Boolean
-        get() = PropertyFactory.getBoolean(taskDefName, "leaseExtendEnabled", false)
+        get() = PropertyFactory.getBoolean(taskDefName, "leaseExtendEnabled") ?: false
 
     val batchPollTimeoutInMS: Int
-        get() = PropertyFactory.getInteger(taskDefName, "batchPollTimeoutInMS", 1000)
+        get() = PropertyFactory.getInteger(taskDefName, "batchPollTimeoutInMS") ?: 1000
 
     val batchPollCount: Int
-        get() = PropertyFactory.getInteger(taskDefName, "batchPollCount", 10)
+        get() = PropertyFactory.getInteger(taskDefName, "batchPollCount") ?: 10
 
     val bufferTaskSize: Int
-        get() = PropertyFactory.getInteger(taskDefName, "bufferTaskSize", batchPollCount)
+        get() = PropertyFactory.getInteger(taskDefName, "bufferTaskSize") ?: batchPollCount
 
     companion object {
 
