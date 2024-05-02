@@ -53,7 +53,7 @@ class TaskRunnerConfigurerBuilder {
      * Builds an instance of the TaskRunnerConfigurer.
      *
      *
-     * Please see [TaskRunnerConfigurer.start] method. The method must be called after
+     * Please see [TaskRunnerConfigurer.startChannel] method. The method must be called after
      * this constructor for the polling to start.
      */
     internal fun build(): TaskRunnerConfigurer {

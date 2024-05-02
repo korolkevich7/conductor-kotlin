@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -30,9 +31,13 @@ import org.conductoross.client.kotlin.worker.Worker
 
 private val logger = KotlinLogging.logger {}
 
-internal fun startWorkerWithChannel(worker: Worker, workersDispatcher: CoroutineDispatcher, taskPollExecutor: TaskPollExecutor) {
-    val workerScope = CoroutineScope(workersDispatcher + SupervisorJob() + CoroutineName("Task ${worker.taskDefName} context"))
+internal fun startWorkerWithChannel(worker: Worker, workersDispatcher: CoroutineDispatcher, taskPollExecutor: TaskPollExecutor, taskRunnerScope: CoroutineScope) {
+    val workerScope = workerScope(workersDispatcher, taskRunnerScope, worker)
 
+    startWorkerWithChannel(worker, taskPollExecutor, workerScope)
+}
+
+internal fun startWorkerWithChannel(worker: Worker, taskPollExecutor: TaskPollExecutor, workerScope: CoroutineScope) {
     val taskChannel: ReceiveChannel<Task> = workerScope.receiveChannel(worker, taskPollExecutor)
     workerScope.launch {
         for (task in taskChannel) {
@@ -51,6 +56,7 @@ private fun CoroutineScope.receiveChannel(worker: Worker, taskPollExecutor: Task
             .onFailure {
                 logger.error(it.cause) { "Failed to poll for tasks for worker ${worker.taskDefName} with error ${it.message}" }
             }.onSuccess { tasks ->
+                logger.debug { "Successfully received ${tasks.size} tasks for worker ${worker.taskDefName}" }
                 tasks.forEach { send(it) }
             }
         delay(worker.pollingInterval.milliseconds)
@@ -58,12 +64,9 @@ private fun CoroutineScope.receiveChannel(worker: Worker, taskPollExecutor: Task
 }
 
 
-internal fun startWorkerWithFlow(worker: Worker, workersDispatcher: CoroutineDispatcher, taskPollExecutor: TaskPollExecutor) {
-    val workerScope = CoroutineScope(
-        workersDispatcher +
-                SupervisorJob() +
-                CoroutineName("Task ${worker.taskDefName} context")
-    )
+internal fun startWorkerWithFlow(worker: Worker, workersDispatcher: CoroutineDispatcher, taskPollExecutor: TaskPollExecutor, taskRunnerScope: CoroutineScope) {
+    val workerScope = workerScope(workersDispatcher, taskRunnerScope, worker)
+
     val flow = workerScope.taskFlow(taskPollExecutor, worker)
         .map {
             taskPollExecutor.processTask(worker, it)
@@ -93,6 +96,13 @@ internal fun CoroutineScope.taskFlow(executor: TaskPollExecutor, worker: Worker)
 internal fun handleProcessException(t: Throwable) {
     when (t) {
         is ConductorTimeoutClientException -> logger.warn { t.message }
-        else -> logger.error { t.message }
+        else -> logger.error(t) { t.message }
     }
 }
+
+fun workerScope(
+    workersDispatcher: CoroutineDispatcher,
+    taskRunnerScope: CoroutineScope,
+    worker: Worker
+) =
+    CoroutineScope(workersDispatcher + SupervisorJob(parent = taskRunnerScope.coroutineContext[Job]) + CoroutineName("Task ${worker.taskDefName} context"))

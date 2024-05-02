@@ -31,5 +31,5 @@ fun main() {
     }
 
     // Start the polling and execution of tasks
-    configurer.start()
+    configurer.startChannel()
 }
