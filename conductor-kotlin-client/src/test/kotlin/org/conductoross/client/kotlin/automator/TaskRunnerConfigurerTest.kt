@@ -13,18 +13,18 @@ package org.conductoross.client.kotlin.automator
 
 import com.netflix.conductor.common.metadata.tasks.Task
 import com.netflix.conductor.common.metadata.tasks.TaskResult
+import io.mockk.mockk
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import org.conductoross.client.kotlin.http.TaskClient
 import org.conductoross.client.kotlin.worker.Worker.Companion.create
-import org.mockito.Mockito
 import java.util.*
 
 class TaskRunnerConfigurerTest {
     private lateinit var client: TaskClient
     @BeforeTest
     fun setup() {
-        client = Mockito.mock(TaskClient::class.java)
+        client = mockk()
     }
 
     @Test//(expected = ConductorClientException::class)
@@ -35,17 +35,5 @@ class TaskRunnerConfigurerTest {
             taskClient = client
             addWorkers(listOf(worker1, worker2))
         }
-    }
-
-    private fun testTask(taskDefName: String): Task {
-        val task = Task()
-        task.taskId = UUID.randomUUID().toString()
-        task.status = Task.Status.IN_PROGRESS
-        task.taskDefName = taskDefName
-        return task
-    }
-
-    companion object {
-        private const val TEST_TASK_DEF_NAME = "test"
     }
 }
