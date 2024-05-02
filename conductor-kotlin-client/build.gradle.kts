@@ -54,6 +54,7 @@ dependencies {
 
     implementation("org.slf4j:slf4j-api")
     implementation("io.github.oshai:kotlin-logging-jvm:${revKotlinLogging}")
+    implementation("ch.qos.logback:logback-classic:1.5.6")
 
     testImplementation("org.powermock:powermock-api-mockito2:${revPowerMock}")
 
