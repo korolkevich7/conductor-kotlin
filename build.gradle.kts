@@ -9,7 +9,7 @@ plugins {
 subprojects {
     apply(plugin = "java")
 
-    group = "org.conductor-oss"
+    group = "org.conductoross"
 
     repositories {
         mavenCentral()

@@ -10,4 +10,8 @@ pluginManagement {
         id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
     }
 }
-include(":conductor-kotlin-client")
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
+}
+include(":conductor-kotlin-client-core")
+include("conductor-kotlin-client-ktor")
