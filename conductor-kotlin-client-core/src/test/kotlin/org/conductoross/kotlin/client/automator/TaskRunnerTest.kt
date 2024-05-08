@@ -7,7 +7,10 @@ import io.mockk.coJustRun
 import io.mockk.mockk
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.conductoross.kotlin.client.http.TaskClient
 import org.conductoross.kotlin.client.task
 import org.conductoross.kotlin.client.worker.Worker
@@ -20,7 +23,7 @@ class TaskRunnerTest {
     }
 
     @Test
-    fun testStartWorkerWithChannel() {
+    fun testStartWorkerWithChannel() = runBlocking {
         coEvery {
             client.batchPollTasksInDomain("task_1", null, any(), 10, 1000)
         } returns listOf(task("task_1"), task("task_1"))
@@ -46,9 +49,9 @@ class TaskRunnerTest {
             addWorkers(listOf(worker1, worker2))
         }
         configurer.startFlow()
-        Thread.sleep(3000)
+        delay(3.seconds)
         configurer.workerScopes.filterKeys { it.taskDefName == "task_1" }.forEach { (_, scope) -> scope.cancel() }
 //        configurer.taskRunnerScope.cancel()
-        Thread.sleep(10000)
+        delay(10.seconds)
     }
 }
