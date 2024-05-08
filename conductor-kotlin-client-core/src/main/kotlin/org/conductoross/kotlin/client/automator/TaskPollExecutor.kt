@@ -66,13 +66,15 @@ class TaskPollExecutor(
         val domain = taskDomain(taskType)
         logger.debug { "Polling task of type: $taskType in domain: '$domain'" }
         val (tasks, duration) = measureTimedValue {
-            taskClient.batchPollTasksInDomain(
-                taskType,
-                domain,
-                worker.identity!!,
-                worker.batchPollCount,
-                worker.batchPollTimeout.inWholeMilliseconds
-            )
+            withTimeout(worker.batchPollTimeout) {
+                taskClient.batchPollTasksInDomain(
+                    taskType,
+                    domain,
+                    worker.identity!!,
+                    worker.batchPollCount,
+                    worker.batchPollTimeout.inWholeMilliseconds
+                )
+            }
         }
         MetricsContainer.recordPollTimer(taskType, duration)
         return tasks
@@ -87,36 +89,49 @@ class TaskPollExecutor(
 //    logger.error(exception) { "Uncaught exception. Context $context will exit now" }
 //}
 
-
     internal suspend fun processTask(worker: Worker, task: Task): TaskWithResult {
         MetricsContainer.incrementTaskPollCount(task.taskType, 1)
         val domain = taskDomain(task.taskType)
-        val taskResponseTimeoutSeconds = task.responseTimeoutSeconds
         logger.debug {
             "Polled task: ${task.taskId} of type: ${task.taskType} in domain: '$domain', from worker: ${worker.identity}" }
-        //TODO
+
+        val taskResponseTimeoutSeconds = task.responseTimeoutSeconds
+        if (taskResponseTimeoutSeconds > 0 && worker.leaseExtendEnabled) {
+            return processTaskWithLease(worker, task)
+        }
+        return processTaskWithTimeout(worker, task)
+    }
+
+    private suspend fun processTaskWithLease(worker: Worker, task: Task): TaskWithResult {
+        return coroutineScope {
+            val taskResponseTimeoutSeconds = task.responseTimeoutSeconds
+            val responseTimeout = task.responseTimeoutFromNow
+
+            val deferred = async {
+                executeTask(worker, task)
+            }
+            val interval = (taskResponseTimeoutSeconds * LEASE_EXTEND_DURATION_FACTOR).seconds
+            val extendLeaseJob = launchExtendLease(interval, responseTimeout - 1.seconds, task, deferred)
+            val result = deferred.await()
+            logger.debug {
+                "Task:${task.taskId} of type:${task.taskDefName} finished processing with status:${result.first.status}" }
+            extendLeaseJob.cancel()
+            result
+        }
+    }
+
+    private suspend fun processTaskWithTimeout(worker: Worker, task: Task): TaskWithResult {
         val responseTimeout = task.responseTimeoutFromNow
         try {
             return withTimeout(responseTimeout) {
-                val deferred = async {
-                    executeTask(worker, task)
-                }
-                val interval = (taskResponseTimeoutSeconds * LEASE_EXTEND_DURATION_FACTOR).seconds
-                var extendLeaseJob: Job? = null
-                if (taskResponseTimeoutSeconds > 0 && worker.leaseExtendEnabled) {
-                    extendLeaseJob = launchExtendLease(interval, task, deferred)
-                }
-                val result = deferred.await()
+                val result = executeTask(worker, task)
                 logger.debug {
                     "Task:${task.taskId} of type:${task.taskDefName} finished processing with status:${result.first.status}" }
-                extendLeaseJob?.cancel()
                 result
             }
         } catch (e: TimeoutCancellationException) {
             throw ConductorTimeoutClientException("Task:${task.taskId} of type:${task.taskDefName} canceled with timeout: $responseTimeout")
         }
-
-        //TODO: should update after it
     }
 
     @OptIn(ExperimentalTime::class)
@@ -231,9 +246,9 @@ class TaskPollExecutor(
     }
 
     @OptIn(ExperimentalTime::class)
-    private suspend fun launchExtendLease(interval: Duration, task: Task, taskDeferred: Job): Job =
+    private suspend fun launchExtendLease(interval: Duration, startDelay: Duration, task: Task, taskDeferred: Job): Job =
         coroutineScope {
-            timer(interval, interval, leaseExtendDispatcher) {
+            launchTimer(interval, startDelay, leaseExtendDispatcher) {
                 extendLease(task, taskDeferred)
             }
         }

@@ -22,11 +22,11 @@ class TaskRunnerTest {
     @Test
     fun testStartWorkerWithChannel() {
         coEvery {
-            client.batchPollTasksInDomain("task_1", null, any(), 2, 1000)
+            client.batchPollTasksInDomain("task_1", null, any(), 10, 1000)
         } returns listOf(task("task_1"), task("task_1"))
 
         coEvery {
-            client.batchPollTasksInDomain("task_2", null, any(), 2, 1000)
+            client.batchPollTasksInDomain("task_2", null, any(), 10, 1000)
         } returns listOf(task("task_2"), task("task_2"))
 
         coEvery {
@@ -45,7 +45,7 @@ class TaskRunnerTest {
             taskClient = client
             addWorkers(listOf(worker1, worker2))
         }
-        configurer.startChannel()
+        configurer.startFlow()
         Thread.sleep(3000)
         configurer.workerScopes.filterKeys { it.taskDefName == "task_1" }.forEach { (_, scope) -> scope.cancel() }
 //        configurer.taskRunnerScope.cancel()

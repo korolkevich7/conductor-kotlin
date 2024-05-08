@@ -84,8 +84,7 @@ class TaskRunnerConfigurer internal constructor(builder: TaskRunnerConfigurerBui
      */
     @Synchronized
     fun startChannel() {
-        workerScopes.forEach { startWorkerWithChannel(it.key, workersDispatcher, taskPollExecutor, it.value) }
-//        workers.forEach { startWorkerWithChannel(it, workersDispatcher, taskPollExecutor, taskRunnerScope) }
+        workerScopes.forEach { startWorkerWithChannel(it.key, taskPollExecutor, it.value) }
     }
 
     /**
@@ -93,7 +92,7 @@ class TaskRunnerConfigurer internal constructor(builder: TaskRunnerConfigurerBui
      */
     @Synchronized
     fun startFlow() {
-        workers.forEach { startWorkerWithFlow(it, workersDispatcher, taskPollExecutor, taskRunnerScope) }
+        workerScopes.forEach { startWorkerWithFlow(it.key, taskPollExecutor, it.value) }
     }
 
     fun shutdown() {

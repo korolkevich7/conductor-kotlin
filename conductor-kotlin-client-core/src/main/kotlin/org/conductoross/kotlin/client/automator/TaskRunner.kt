@@ -2,7 +2,7 @@ package org.conductoross.kotlin.client.automator
 
 import com.netflix.conductor.common.metadata.tasks.Task
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.coroutines.coroutineContext
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
@@ -14,7 +14,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -22,7 +21,6 @@ import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -31,17 +29,6 @@ import org.conductoross.kotlin.client.exception.ConductorTimeoutClientException
 import org.conductoross.kotlin.client.worker.Worker
 
 private val logger = KotlinLogging.logger {}
-
-internal fun startWorkerWithChannel(
-    worker: Worker,
-    workersDispatcher: CoroutineDispatcher,
-    taskPollExecutor: TaskPollExecutor,
-    taskRunnerScope: CoroutineScope
-) {
-    val workerScope = workerScope(workersDispatcher, taskRunnerScope, worker)
-
-    startWorkerWithChannel(worker, taskPollExecutor, workerScope)
-}
 
 internal fun startWorkerWithChannel(worker: Worker, taskPollExecutor: TaskPollExecutor, workerScope: CoroutineScope) {
     val taskChannel: ReceiveChannel<Task> = workerScope.receiveChannel(worker, taskPollExecutor)
@@ -72,26 +59,24 @@ private fun CoroutineScope.receiveChannel(worker: Worker, taskPollExecutor: Task
 
 internal fun startWorkerWithFlow(
     worker: Worker,
-    workersDispatcher: CoroutineDispatcher,
     taskPollExecutor: TaskPollExecutor,
-    taskRunnerScope: CoroutineScope
+    workerScope: CoroutineScope
 ) {
-    val workerScope = workerScope(workersDispatcher, taskRunnerScope, worker)
-    val taskFlow = taskFlow(taskPollExecutor, worker, workersDispatcher)
+    val taskFlow = taskFlow(taskPollExecutor, worker)
 
-    startWorkerWithFlowAndWorkerScope(taskFlow, worker, taskPollExecutor, workerScope)
+    taskFlow.collectWorkerFlow(worker, taskPollExecutor, workerScope)
 }
 
 
-internal fun startWorkerWithFlowAndWorkerScope(
-    flow: Flow<Task>,
+private fun Flow<Task>.collectWorkerFlow(
     worker: Worker,
     taskPollExecutor: TaskPollExecutor,
     workerScope: CoroutineScope
 ) {
-    flow
-        .buffer(worker.bufferTaskSize, onBufferOverflow = BufferOverflow.SUSPEND)
+    buffer(worker.bufferTaskSize, onBufferOverflow = BufferOverflow.SUSPEND)
         .map {
+            val context = coroutineContext
+            logger.debug { "Processing context $context" }
             taskPollExecutor.processTask(worker, it)
         }
         .onEach { taskPollExecutor.updateTaskResult(it.first, it.second, worker) }
@@ -100,20 +85,20 @@ internal fun startWorkerWithFlowAndWorkerScope(
 }
 
 @OptIn(ExperimentalTime::class)
-internal fun taskFlow(executor: TaskPollExecutor, worker: Worker, workersDispatcher: CoroutineDispatcher): Flow<Task> =
+internal fun taskFlow(executor: TaskPollExecutor, worker: Worker): Flow<Task> =
     flow {
-        coroutineScope {
-            timerExact(interval = worker.pollingInterval) {
-                val pollingResult = runCatching { executor.poll(worker) }
-                pollingResult
-                    .onFailure {
-                        logger.error(it.cause) { "Failed to poll for tasks for worker ${worker.taskDefName} with error ${it.message}" }
-                    }.onSuccess { tasks ->
-                        emitAll(tasks.asFlow())
-                    }
-            }
+        timerExact(interval = worker.pollingInterval) {
+            val context = coroutineContext
+            logger.debug { "Emitting context $context" }
+            val pollingResult = runCatching { executor.poll(worker) }
+            pollingResult
+                .onFailure {
+                    logger.error(it.cause) { "Failed to poll for tasks for worker ${worker.taskDefName} with error ${it.message}" }
+                }.onSuccess { tasks ->
+                    emitAll(tasks.asFlow())
+                }
         }
-    }.flowOn(workersDispatcher)
+    }
 
 internal fun handleProcessException(t: Throwable) {
     when (t) {
