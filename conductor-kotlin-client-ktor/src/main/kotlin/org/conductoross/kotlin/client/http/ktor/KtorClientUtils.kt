@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
-import org.conductoross.client.kotlin.config.ObjectMapperProvider
-import org.conductoross.client.kotlin.exception.ConductorClientException
+import org.conductoross.kotlin.client.config.ObjectMapperProvider
+import org.conductoross.kotlin.client.exception.ConductorClientException
 import com.netflix.conductor.common.jackson.JsonProtoModule
 import com.netflix.conductor.common.validation.ErrorResponse
 import io.github.oshai.kotlinlogging.KotlinLogging

@@ -11,8 +11,8 @@
  */
 package org.conductoross.kotlin.client.sample
 
-import org.conductoross.client.kotlin.automator.TaskRunnerConfigurer
-import org.conductoross.client.kotlin.http.TaskClient
+import org.conductoross.kotlin.client.automator.TaskRunnerConfigurer
+import org.conductoross.kotlin.client.http.TaskClient
 import org.conductoross.kotlin.client.http.ktor.KtorTaskClient
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*

@@ -1,6 +1,6 @@
 package org.conductoross.kotlin.client.http.ktor
 
-import org.conductoross.client.kotlin.http.TaskClient
+import org.conductoross.kotlin.client.http.TaskClient
 import com.netflix.conductor.common.metadata.tasks.Task
 import com.netflix.conductor.common.run.SearchResult
 import com.netflix.conductor.common.run.TaskSummary

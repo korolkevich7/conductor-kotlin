@@ -2,10 +2,10 @@ package org.conductoross.kotlin.client.http.ktor
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.conductoross.client.kotlin.config.DefaultConductorClientConfiguration
-import org.conductoross.client.kotlin.config.ObjectMapperProvider
-import org.conductoross.client.kotlin.exception.ConductorClientException
-import org.conductoross.client.kotlin.http.PayloadStorage
+import org.conductoross.kotlin.client.config.DefaultConductorClientConfiguration
+import org.conductoross.kotlin.client.config.ObjectMapperProvider
+import org.conductoross.kotlin.client.exception.ConductorClientException
+import org.conductoross.kotlin.client.http.PayloadStorage
 import com.netflix.conductor.common.run.ExternalStorageLocation
 import io.ktor.client.*
 import io.ktor.utils.io.errors.*

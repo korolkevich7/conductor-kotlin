@@ -1,9 +1,9 @@
 package org.conductoross.kotlin.client.config
 
-import org.conductoross.client.kotlin.config.PropertyFactory.Companion.getBoolean
-import org.conductoross.client.kotlin.config.PropertyFactory.Companion.getInteger
-import org.conductoross.client.kotlin.config.PropertyFactory.Companion.getString
-import org.conductoross.client.kotlin.worker.Worker.Companion.create
+import org.conductoross.kotlin.client.config.PropertyFactory.Companion.getBoolean
+import org.conductoross.kotlin.client.config.PropertyFactory.Companion.getInteger
+import org.conductoross.kotlin.client.config.PropertyFactory.Companion.getString
+import org.conductoross.kotlin.client.worker.Worker.Companion.create
 import com.netflix.conductor.common.metadata.tasks.TaskResult
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -1,7 +1,7 @@
 package org.conductoross.kotlin.client.http.ktor
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.conductoross.client.kotlin.http.EventClient
+import org.conductoross.kotlin.client.http.EventClient
 import com.netflix.conductor.common.metadata.events.EventHandler
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*

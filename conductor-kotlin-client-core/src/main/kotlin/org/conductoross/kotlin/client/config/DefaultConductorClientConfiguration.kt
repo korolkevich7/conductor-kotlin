@@ -4,8 +4,7 @@ package org.conductoross.kotlin.client.config
  * A default implementation of [ConductorClientConfiguration] where external payload storage
  * is disabled.
  */
-object DefaultConductorClientConfiguration :
-    _root_ide_package_.org.conductoross.kotlin.client.config.ConductorClientConfiguration {
+object DefaultConductorClientConfiguration : ConductorClientConfiguration {
 
     override fun getWorkflowInputPayloadThresholdKB(): Int = 5120
 

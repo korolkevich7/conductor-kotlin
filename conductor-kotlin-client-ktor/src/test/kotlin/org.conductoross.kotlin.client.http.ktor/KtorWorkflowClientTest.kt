@@ -1,6 +1,6 @@
 package org.conductoross.kotlin.client.http.ktor
 
-import org.conductoross.client.kotlin.http.WorkflowClient
+import org.conductoross.kotlin.client.http.WorkflowClient
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef
 import com.netflix.conductor.common.run.SearchResult
 import com.netflix.conductor.common.run.Workflow

@@ -27,8 +27,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.conductoross.client.kotlin.exception.ConductorTimeoutClientException
-import org.conductoross.client.kotlin.worker.Worker
+import org.conductoross.kotlin.client.exception.ConductorTimeoutClientException
+import org.conductoross.kotlin.client.worker.Worker
 
 private val logger = KotlinLogging.logger {}
 

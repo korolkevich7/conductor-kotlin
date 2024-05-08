@@ -1,8 +1,8 @@
 package org.conductoross.kotlin.client.http.ktor
 
-import org.conductoross.client.kotlin.exception.ConductorClientException
-import org.conductoross.client.kotlin.http.PayloadStorage
-import org.conductoross.client.kotlin.http.WorkflowClient
+import org.conductoross.kotlin.client.exception.ConductorClientException
+import org.conductoross.kotlin.client.http.PayloadStorage
+import org.conductoross.kotlin.client.http.WorkflowClient
 import com.netflix.conductor.common.metadata.workflow.RerunWorkflowRequest
 import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest
 import com.netflix.conductor.common.model.BulkResponse
@@ -15,10 +15,10 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.utils.io.errors.*
-import org.conductoross.client.kotlin.telemetry.MetricsContainer
-import org.conductoross.client.kotlin.telemetry.incrementExternalPayloadUsedCount
-import org.conductoross.client.kotlin.telemetry.incrementWorkflowStartErrorCount
-import org.conductoross.client.kotlin.telemetry.recordWorkflowInputPayloadSize
+import org.conductoross.kotlin.client.telemetry.MetricsContainer
+import org.conductoross.kotlin.client.telemetry.incrementExternalPayloadUsedCount
+import org.conductoross.kotlin.client.telemetry.incrementWorkflowStartErrorCount
+import org.conductoross.kotlin.client.telemetry.recordWorkflowInputPayloadSize
 
 class KtorWorkflowClient(rootURI: String, httpClient: HttpClient): WorkflowClient, KtorBaseClient(rootURI, httpClient) {
 

@@ -1,6 +1,6 @@
 package org.conductoross.kotlin.client.http.ktor
 
-import org.conductoross.client.kotlin.http.MetadataClient
+import org.conductoross.kotlin.client.http.MetadataClient
 import com.netflix.conductor.common.metadata.tasks.TaskDef
 import com.netflix.conductor.common.metadata.workflow.WorkflowDef
 import io.ktor.client.*

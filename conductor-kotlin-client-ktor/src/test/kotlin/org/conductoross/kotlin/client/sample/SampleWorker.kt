@@ -11,7 +11,7 @@
  */
 package org.conductoross.kotlin.client.sample
 
-import org.conductoross.client.kotlin.worker.Worker
+import org.conductoross.kotlin.client.worker.Worker
 import com.netflix.conductor.common.metadata.tasks.Task
 import com.netflix.conductor.common.metadata.tasks.TaskResult
 

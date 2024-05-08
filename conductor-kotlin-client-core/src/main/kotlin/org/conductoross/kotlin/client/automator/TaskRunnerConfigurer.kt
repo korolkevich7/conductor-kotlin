@@ -1,7 +1,7 @@
 package org.conductoross.kotlin.client.automator
 
-import org.conductoross.client.kotlin.http.TaskClient
-import org.conductoross.client.kotlin.worker.Worker
+import org.conductoross.kotlin.client.http.TaskClient
+import org.conductoross.kotlin.client.worker.Worker
 import com.netflix.discovery.EurekaClient
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.math.min

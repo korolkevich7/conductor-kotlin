@@ -1,10 +1,9 @@
 package org.conductoross.kotlin.client.automator
 
 import com.netflix.appinfo.InstanceInfo
-import org.conductoross.client.kotlin.exception.ConductorClientException
-import org.conductoross.client.kotlin.http.TaskClient
-//import org.conductoross.client.kotlin.http.ktor.KtorClientTest
-import org.conductoross.client.kotlin.sample.SampleWorker
+import org.conductoross.kotlin.client.exception.ConductorClientException
+import org.conductoross.kotlin.client.http.TaskClient
+import org.conductoross.kotlin.client.sample.SampleWorker
 import com.netflix.conductor.common.metadata.tasks.Task
 import com.netflix.conductor.common.metadata.tasks.TaskResult
 import com.netflix.conductor.common.metadata.tasks.TaskType

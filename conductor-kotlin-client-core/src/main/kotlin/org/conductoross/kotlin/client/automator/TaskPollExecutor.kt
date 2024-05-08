@@ -1,10 +1,10 @@
 package org.conductoross.kotlin.client.automator
 
 import com.netflix.appinfo.InstanceInfo
-import org.conductoross.client.kotlin.config.PropertyFactory
-import org.conductoross.client.kotlin.exception.ConductorTimeoutClientException
-import org.conductoross.client.kotlin.http.TaskClient
-import org.conductoross.client.kotlin.worker.Worker
+import org.conductoross.kotlin.client.config.PropertyFactory
+import org.conductoross.kotlin.client.exception.ConductorTimeoutClientException
+import org.conductoross.kotlin.client.http.TaskClient
+import org.conductoross.kotlin.client.worker.Worker
 import com.netflix.conductor.common.metadata.tasks.Task
 import com.netflix.conductor.common.metadata.tasks.TaskResult
 import com.netflix.conductor.common.metadata.tasks.responseTimeoutFromNow
@@ -15,15 +15,15 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
-import org.conductoross.client.kotlin.telemetry.MetricsContainer
-import org.conductoross.client.kotlin.telemetry.incrementTaskExecutionErrorCount
-import org.conductoross.client.kotlin.telemetry.incrementTaskLeaseExtendCount
-import org.conductoross.client.kotlin.telemetry.incrementTaskLeaseExtendErrorCount
-import org.conductoross.client.kotlin.telemetry.incrementTaskPausedCount
-import org.conductoross.client.kotlin.telemetry.incrementTaskPollCount
-import org.conductoross.client.kotlin.telemetry.incrementTaskUpdateErrorCount
-import org.conductoross.client.kotlin.telemetry.recordExecutionTimer
-import org.conductoross.client.kotlin.telemetry.recordPollTimer
+import org.conductoross.kotlin.client.telemetry.MetricsContainer
+import org.conductoross.kotlin.client.telemetry.incrementTaskExecutionErrorCount
+import org.conductoross.kotlin.client.telemetry.incrementTaskLeaseExtendCount
+import org.conductoross.kotlin.client.telemetry.incrementTaskLeaseExtendErrorCount
+import org.conductoross.kotlin.client.telemetry.incrementTaskPausedCount
+import org.conductoross.kotlin.client.telemetry.incrementTaskPollCount
+import org.conductoross.kotlin.client.telemetry.incrementTaskUpdateErrorCount
+import org.conductoross.kotlin.client.telemetry.recordExecutionTimer
+import org.conductoross.kotlin.client.telemetry.recordPollTimer
 
 private val logger = KotlinLogging.logger {}
 

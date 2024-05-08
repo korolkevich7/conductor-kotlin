@@ -13,7 +13,7 @@
 package org.conductoross.kotlin.client.worker
 
 import com.amazonaws.util.EC2MetadataUtils
-import org.conductoross.client.kotlin.config.PropertyFactory
+import org.conductoross.kotlin.client.config.PropertyFactory
 import com.netflix.conductor.common.metadata.tasks.Task
 import com.netflix.conductor.common.metadata.tasks.TaskResult
 import io.github.oshai.kotlinlogging.KotlinLogging

@@ -1,8 +1,8 @@
 package org.conductoross.kotlin.client.http.ktor
 
-import org.conductoross.client.kotlin.exception.ConductorClientException
-import org.conductoross.client.kotlin.http.PayloadStorage
-import org.conductoross.client.kotlin.http.TaskClient
+import org.conductoross.kotlin.client.exception.ConductorClientException
+import org.conductoross.kotlin.client.http.PayloadStorage
+import org.conductoross.kotlin.client.http.TaskClient
 import com.netflix.conductor.common.metadata.tasks.PollData
 import com.netflix.conductor.common.metadata.tasks.Task
 import com.netflix.conductor.common.metadata.tasks.TaskExecLog
@@ -15,9 +15,9 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.utils.io.errors.IOException
-import org.conductoross.client.kotlin.telemetry.MetricsContainer
-import org.conductoross.client.kotlin.telemetry.incrementExternalPayloadUsedCount
-import org.conductoross.client.kotlin.telemetry.recordTaskResultPayloadSize
+import org.conductoross.kotlin.client.telemetry.MetricsContainer
+import org.conductoross.kotlin.client.telemetry.incrementExternalPayloadUsedCount
+import org.conductoross.kotlin.client.telemetry.recordTaskResultPayloadSize
 
 class KtorTaskClient(rootURI: String, httpClient: HttpClient): TaskClient, KtorBaseClient(rootURI, httpClient) {
     companion object {

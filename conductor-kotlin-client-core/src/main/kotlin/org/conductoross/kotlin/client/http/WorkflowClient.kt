@@ -1,7 +1,7 @@
 package org.conductoross.kotlin.client.http
 
 import org.conductoross.kotlin.client.config.ConductorClientConfiguration
-import org.conductoross.client.kotlin.exception.ConductorClientException
+import org.conductoross.kotlin.client.exception.ConductorClientException
 import com.netflix.conductor.common.metadata.workflow.RerunWorkflowRequest
 import com.netflix.conductor.common.metadata.workflow.StartWorkflowRequest
 import com.netflix.conductor.common.model.BulkResponse

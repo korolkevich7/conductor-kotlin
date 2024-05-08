@@ -16,8 +16,8 @@ import com.netflix.conductor.common.metadata.tasks.TaskResult
 import io.mockk.mockk
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import org.conductoross.client.kotlin.http.TaskClient
-import org.conductoross.client.kotlin.worker.Worker.Companion.create
+import org.conductoross.kotlin.client.http.TaskClient
+import org.conductoross.kotlin.client.worker.Worker.Companion.create
 import java.util.*
 
 class TaskRunnerConfigurerTest {

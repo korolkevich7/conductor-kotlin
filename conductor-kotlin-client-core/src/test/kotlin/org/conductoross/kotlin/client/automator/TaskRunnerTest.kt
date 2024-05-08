@@ -8,9 +8,9 @@ import io.mockk.mockk
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.cancel
-import org.conductoross.client.kotlin.http.TaskClient
-import org.conductoross.client.kotlin.task
-import org.conductoross.client.kotlin.worker.Worker
+import org.conductoross.kotlin.client.http.TaskClient
+import org.conductoross.kotlin.client.task
+import org.conductoross.kotlin.client.worker.Worker
 
 class TaskRunnerTest {
     private lateinit var client: TaskClient
